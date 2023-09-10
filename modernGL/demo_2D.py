@@ -1,8 +1,8 @@
-import numpy as np
 from time import time
 
 import moderngl
 import moderngl_window as mglw
+import numpy as np
 
 
 class Window(mglw.WindowConfig):
@@ -55,12 +55,12 @@ class ModernGLDemo(Window):
             ''',
         )
 
-        self.scale_window = self.prog['scale_window']   # resize window
-        self.scale_global = self.prog["scale_global"]   # zoom in/out
+        self.scale_window = self.prog['scale_window']  # resize window
+        self.scale_global = self.prog["scale_global"]  # zoom in/out
         # self.color = self.prog['vert_color']
         # self.rotation = self.prog['rotation']
         self.scale_window.value = (0.5, self.aspect_ratio * 0.5)
-        self.scale_global.value = 1
+        self.scale_global.value = 10
         self.make_grid()
 
     def make_grid(self, n=60):
@@ -87,20 +87,27 @@ class ModernGLDemo(Window):
         self.vao.render(moderngl.LINES)
 
     def draw_rectangles(self, center: np.ndarray, shape: np.ndarray):
+        '''
+        draw rectangles
+        :param center:  center of rectangles
+        :param shape:   shape of rectangles (width, height)
+        :return:        None
+        '''
         if center.shape[0] != shape.shape[0]:
             raise ValueError("center.shape[0] != shape.shape[0]")
-        
+
         vert = np.array([], dtype=np.float32)
-        np.random.seed(1)   # random color
-        for i in range(self.n):
+        n = center.shape[0]
+        np.random.seed(1)  # random color
+        for i in range(n):
             color = np.random.rand(3)
             # 4 nodes of a rectangle (anti-clockwise)
             nodes = [center[i] - shape[i] / 2,
                      center[i] + np.array([shape[i, 0], -shape[i, 1]]) / 2,
                      center[i] + shape[i] / 2,
                      center[i] + np.array([-shape[i, 0], shape[i, 1]]) / 2]
-            indicies = np.take(nodes, [0, 1, 3, 1, 2, 3], axis=0)
-            for v in indicies:
+            indices = np.take(nodes, [0, 1, 3, 1, 2, 3], axis=0)
+            for v in indices:
                 vert = np.append(vert, v)
                 vert = np.append(vert, color)
 
@@ -110,7 +117,46 @@ class ModernGLDemo(Window):
             self.prog, self.vbo, 'vert', 'vert_color')
         self.vao.render(moderngl.TRIANGLES)
 
+    def draw_circle(self, center: np.ndarray, radius: np.float32,
+                    n=64, color=np.array([.0, 0., 0.])):
+        '''
+        draw a circle by combining triangles
+        :param center:  center of circle
+        :param radius:  radius of circle
+        :param n:       number of points
+        :param color:   color of circle
+        :return:        None
+        '''
+        angle = np.linspace(0, 2 * np.pi, n)
+        p = center + radius * np.array([np.cos(angle), np.sin(angle)]).T
+        p = np.insert(p, 0, center, axis=0)
+        vert = np.hstack((p, np.tile(color, (n + 1, 1))))
+
+        self.vbo = self.ctx.buffer(vert.astype(np.float32))
+        self.vao = self.ctx.vertex_array(
+            self.prog, self.vbo, 'vert', 'vert_color')
+        self.vao.render(moderngl.TRIANGLE_FAN)
+
+    def draw_points(self, p: np.ndarray, size=.1):
+        '''
+        draw points using circles with small radius
+        :param p:  points
+        :param size:  radius of circles
+        :return:  None
+        '''
+        n = p.shape[0]
+        vert = np.array([])
+        color = np.random.random(3) / 8  # random dark color
+        for i in range(n):
+            self.draw_circle(p[i], size, color=color, n=16)
+
     def draw_connections(self, p: np.ndarray, adj: np.ndarray):
+        '''
+        draw connections between points
+        :param p:       points
+        :param adj:     (weighted) adjacency matrix
+        :return:        None
+        '''
         if adj.shape[0] != p.shape[0]:
             raise ValueError("adj.shape[0] != center.shape[0]")
 
@@ -118,7 +164,7 @@ class ModernGLDemo(Window):
         vert = np.array([], dtype=np.float32)
         color = np.array([.1, .0, .1])
         for i in range(n):
-            for j in range(i+1, n):
+            for j in range(i + 1, n):
                 if adj[i, j] != 0:
                     vert = np.append(vert, p[i])
                     vert = np.append(vert, color)
@@ -131,45 +177,26 @@ class ModernGLDemo(Window):
             self.prog, self.vbo, 'vert', 'vert_color')
         self.vao.render(moderngl.LINES)
 
-    def draw_points(self, p: np.ndarray):
-        n = p.shape[0]
-        vert = np.array([])
-        color = np.array([.0, .0, .0])  # black
-        for i in range(n):
-            vert = np.append(vert, p[i])
-            vert = np.append(vert, color)
-
-        self.vbo = self.ctx.buffer(vert.astype(np.float32))
-        self.vao = self.ctx.vertex_array(
-            self.prog, self.vbo, 'vert', 'vert_color')
-        self.vao.render(moderngl.POINTS, 100)
-
-    # ----------------------------------------------
-
+    # ---------------------------------------------
+    # ---------------render loop-------------------
     def render(self, time: float, frame_time: float):
         # clear screen
         self.ctx.clear(1.0, 1.0, 1.0)
         self.ctx.enable(moderngl.BLEND)
 
         # ==================
-        # add your code here
-
-        # draw grids
+        # add code here
         self.draw_grid()
-        # draw geometries
-        # self.draw_rectangles()
+        # self.draw_rectangles(np.array([[0, 0]]), np.array([[1, 1]]))
+        self.draw_circle(np.array([0, 0]), np.array([10, 10]) * time)
 
-        # draw connections
         # self.draw_connections()
 
         # self.draw_center()
-        p = np.array([[0, 0], [1, 1], [2, 2], [3, 3]], dtype=np.float32)
+        p = np.random.randint(-10, 10, (10, 2))
         self.draw_points(p)
-
-        # if time > 1:
-        #     self.close()
 
 
 if __name__ == "__main__":
-    # np.random.seed(0)
+    # mglw.run_window_config(ModernGLDemo)
     ModernGLDemo.run()
