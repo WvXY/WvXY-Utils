@@ -11,7 +11,7 @@ class Window(mglw.WindowConfig):
     window_size = (1280, 720)
     aspect_ratio = 16 / 9
     resizable = True
-    samples = 4  # anti-aliasing
+    samples = 1  # anti-aliasing
     cursor = True
     point_size = 100
 
