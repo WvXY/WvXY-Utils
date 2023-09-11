@@ -4,29 +4,38 @@ import (
 	"fmt"
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
-	"gonum.org/v1/gonum/mat"
+	//"gonum.org/v1/gonum/mat"
 	"log"
 	"runtime"
 	"strings"
 	"time"
 )
 
-
 // https://kylewbanks.com/blog/tutorial-opengl-with-golang-part-1-hello-opengl
 func main() {
+	// initialize
 	runtime.LockOSThread()
 	window := initGLFW()
 	defer glfw.Terminate()
 
 	program := initOpenGL()
 
+	// vertices
+	var (
+		p = []float32{
+			0, 0.5, 0, // top
+			-0.5, -0.5, 0, // left
+			0.5, -0.5, 0, // right
+		}
+	)
+
 	vao := makeVAO(p)
 	//gl.ClearColor(1.0, 1.0, 1.0, 1.0)
 
-	st := time.Now().Nanosecond()	// fps
+	st := time.Now().Nanosecond() // fps
 	for !window.ShouldClose() {
 
-		draw(window, program, vao)	// main loop
+		draw(window, program, vao) // main loop
 
 		// fps
 		et := time.Now().Nanosecond()
@@ -35,7 +44,6 @@ func main() {
 		st = et
 	}
 }
-
 
 /* initialize */
 func initGLFW() *glfw.Window {
