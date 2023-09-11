@@ -1,1 +1,1 @@
-Hi, this is my personal utility library for Python, C++, Go, and so on.
+My personal utility library for Python, C++, and so on.
