@@ -17,49 +17,9 @@ void processInput(GLFWwindow *window);
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
-// glfw initialization
-void init_glfw()
-{
-    if (!glfwInit())
-    {
-        std::cout << stderr << "Failed to initialize GLFW" << std::endl;
-        exit(EXIT_FAILURE);
-    }
+void init_glfw();
+void init_glad();
 
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // opengl 3.X
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3); // opengl x.3
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
-    glfwWindowHint(GLFW_SAMPLES, 4); // anti-aliasing
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-
-    // create window
-    window = glfwCreateWindow(
-        SCR_WIDTH,
-        SCR_HEIGHT,
-        "demo",
-        NULL,
-        NULL);
-
-    if (window == NULL)
-    {
-        std::cout << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-        exit(EXIT_FAILURE);
-    }
-    glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-}
-
-int init_glad()
-{
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
-        std::cout << "Failed to initialize GLAD" << std::endl;
-        return -1;
-    }
-}
 /*===============================================================*/
 /*  ----------------main loop---------------- */
 void render_loop()
@@ -112,6 +72,56 @@ int main(int argc, char *argv[])
     exit(EXIT_SUCCESS);
 }
 
+
+/* -----------------functions-------------------*/
+
+// glfw initialization
+void init_glfw()
+{
+  if (!glfwInit())
+  {
+    std::cout << stderr << "Failed to initialize GLFW" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  glfwInit();
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // opengl 3.X
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3); // opengl x.3
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+  glfwWindowHint(GLFW_SAMPLES, 4); // anti-aliasing
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+
+  // create window
+  window = glfwCreateWindow(
+          SCR_WIDTH,
+          SCR_HEIGHT,
+          "demo",
+          NULL,
+          NULL);
+
+  if (window == NULL)
+  {
+    std::cout << "Failed to create GLFW window" << std::endl;
+    glfwTerminate();
+    exit(EXIT_FAILURE);
+  }
+  glfwMakeContextCurrent(window);
+  glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+}
+
+
+void init_glad()
+{
+  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+  {
+    std::cout << "Failed to initialize GLAD" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+}
+
+
+
 void process_input(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -120,7 +130,7 @@ void process_input(GLFWwindow *window)
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------
-void framebuffer_size_callback(GLFWwindow *window, int width, int height)
+void framebuffer_size_callback(GLFWwindow *_window, int width, int height)
 {
     // make sure the viewport matches the new window dimensions; note that width and
     // height will be significantly larger than specified on retina displays.
