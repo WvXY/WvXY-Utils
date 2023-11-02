@@ -157,7 +157,7 @@ const char *fragmentShaderSource =
     "frag_colour = vec4(1, 1, 1, 1);"
     "}";
 
-
+// working on this
 int make_vao(int verts)
 {
     

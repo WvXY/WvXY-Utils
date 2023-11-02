@@ -1,5 +1,4 @@
-#include <stdlib.h>
-#include <stdio.h>
+#include <iostream>
 #include <string.h>
 
 #include <GLFW/glfw3.h>
@@ -11,13 +10,13 @@ void render_loop()
     glClearColor ( 1.0f, 1.0f, 1.0f, 1.0f );
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glPointSize(10);
-    glLineWidth(2.5);
+    glLineWidth(10);
     glColor3f(1.0, 0.0, 0.0);
 
 
     glBegin(GL_LINES);  // legacy 
-    glVertex3f(10.0,10.0,0.0);
-    glVertex3f(200.0,200.0,0.0);
+    glVertex3f(20.0,20.0,0.0);
+    glVertex3f(100.0,100.0,0.0);
     glEnd();
 }
 
@@ -33,7 +32,7 @@ int main(int argc, char *argv[])
     }
 
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-    window = glfwCreateWindow(400, 400, "demo", NULL, NULL );
+    window = glfwCreateWindow(480, 480, "demo", NULL, NULL );
     if (!window)
     {
         fprintf( stderr, "Failed to open GLFW window\n" );
@@ -46,12 +45,12 @@ int main(int argc, char *argv[])
     glfwSwapInterval( 1 );
 
     // set up view
-    glViewport( 0, 0, 400, 400 );
+    glViewport( 0, 0, 480, 480 );
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
 
     // see https://www.opengl.org/sdk/docs/man2/xhtml/glOrtho.xml
-    glOrtho(0.0, 400.0, 0.0, 400.0, 0.0, 1.0); // this creates a canvas you can do 2D drawing on
+    glOrtho(-0.0, 100.0, -0.0, 100.0, 0.0, 1.0); // this creates a canvas you can do 2D drawing on
 
 
     // Main loop
