@@ -16,8 +16,8 @@ find_package(OpenGL REQUIRED)
 #pkg_check_modules(gmp REQUIRED IMPORTED_TARGET gmp)
 
 add_executable(${PROJECT_NAME}
-        demo_legacy.cpp
-        #        demo_modern.cpp
+#        demo_legacy.cpp
+        demo_modern.cpp
         )
 
 target_link_libraries(${PROJECT_NAME}

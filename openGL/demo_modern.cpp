@@ -1,6 +1,5 @@
-// #include <stdlib.h>
-// #include <stdio.h>
 #include <iostream>
+#include <string>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -8,78 +7,50 @@
 
 
 /*===============================================================*/
-/* ----initialization---- */
-GLFWwindow *window;
-void framebuffer_size_callback(GLFWwindow *window, int width, int height);
-void processInput(GLFWwindow *window);
-
 // window settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
-void init_glfw();
-void init_glad();
+/* -------------------VAO, VBO---------------------*/
+std::string vertexShaderSource =
+        "#version 330\n"
+        "in vec3 aPos;\n"
+        "void main()\n"
+        "{\n"
+        "   gl_Position = vec4(aPos, 1.0);\n"
+        "}\n";
 
-/*===============================================================*/
-/*  ----------------main loop---------------- */
-void render_loop()
-{
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glPointSize(10);
-    glLineWidth(2.5);
+std::string fragmentShaderSource =
+        "#version 330\n"
+        "out vec4 FragColor;\n"
+        "void main()\n"
+        "{\n"
+        "  FragColor = vec4(0.0f, 1.f, 0.f, 1.0f);\n"
+        "}\n";
 
-    float vertices[] = {
-        // positions         // colors
-        0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,  // bottom right
-        -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom left
-        0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f    // top
-    };
+float vertices[] = {
+        -0.5f, -0.5f, 0.0f,
+        0.5f, -0.5f, 0.0f,
+        0.0f, 0.5f, 0.0f
+};
+
+
+void process_input(GLFWwindow *window) {
+  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+    glfwSetWindowShouldClose(window, true);
+  }
 }
 
-/* program entry */
-int main(int argc, char *argv[])
-{
-    init_glfw();
-    init_glad();
-
-    glfwMakeContextCurrent(window);
-    glfwSwapInterval(1);
-
-    // set up view
-    glViewport(0, 0, 400, 400);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-
-    // see https://www.opengl.org/sdk/docs/man2/xhtml/glOrtho.xml
-    glOrtho(0.0, 400.0, 0.0, 400.0, 0.0, 1.0); // this creates a canvas you can do 2D drawing on
-
-    // Main loop
-    while (!glfwWindowShouldClose(window))
-    {
-        // Draw
-        render_loop();
-
-        // Swap buffers
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-    }
-
-    // Terminate GLFW
-    glfwTerminate();
-
-    // Exit program
-    exit(EXIT_SUCCESS);
+// ---------------------------------------------------------------------------------------------
+void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
+  glViewport(0, 0, width, height);
 }
-
 
 /* -----------------functions-------------------*/
 
 // glfw initialization
-void init_glfw()
-{
-  if (!glfwInit())
-  {
+GLFWwindow *init_glfw() {
+  if (!glfwInit()) {
     std::cout << stderr << "Failed to initialize GLFW" << std::endl;
     exit(EXIT_FAILURE);
   }
@@ -93,26 +64,25 @@ void init_glfw()
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
   // create window
-  window = glfwCreateWindow(
-          SCR_WIDTH,
-          SCR_HEIGHT,
-          "demo",
-          NULL,
-          NULL);
+  GLFWwindow* window = glfwCreateWindow(
+            SCR_WIDTH,
+            SCR_HEIGHT,
+            "demo",
+            NULL,
+            NULL);
 
-  if (window == NULL)
-  {
+  if (window == NULL) {
     std::cout << "Failed to create GLFW window" << std::endl;
     glfwTerminate();
     exit(EXIT_FAILURE);
   }
   glfwMakeContextCurrent(window);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+  return window;
 }
 
 
-void init_glad()
-{
+void init_glad() {
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
   {
     std::cout << "Failed to initialize GLAD" << std::endl;
@@ -120,51 +90,131 @@ void init_glad()
   }
 }
 
+//===============================================================//
 
+unsigned int make_vao(float verts[]) {
+  unsigned int VBO, VAO;
+  glGenVertexArrays(1, &VAO);
+  glGenBuffers(1, &VBO);
 
-void process_input(GLFWwindow *window)
-{
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
+  glBindVertexArray(VAO);
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
+
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
+
+  return VAO;
 }
 
-// glfw: whenever the window size changed (by OS or user resize) this callback function executes
-// ---------------------------------------------------------------------------------------------
-void framebuffer_size_callback(GLFWwindow *_window, int width, int height)
-{
-    // make sure the viewport matches the new window dimensions; note that width and
-    // height will be significantly larger than specified on retina displays.
-    glViewport(0, 0, width, height);
+
+unsigned int compile_shader(std::string source, int type) {
+  unsigned int shader = glCreateShader(type); // type = GL_VERTEX_SHADER or GL_FRAGMENT_SHADER
+  auto src = source.c_str();
+  glShaderSource(shader, 1, &src, NULL);
+  glCompileShader(shader);
+
+  // error handling
+  int success;
+  char infoLog[512];
+  glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+  if (!success) {
+    std::cout << stderr << "Failed to compile shader" << std::endl;
+    glGetShaderInfoLog(shader, 512, NULL, infoLog);
+    std::cout << stderr << infoLog << std::endl;
+  }
+
+  return shader;
 }
 
+
+unsigned int create_program(unsigned int vertexShader, unsigned int fragmentShader) {
+  unsigned int shaderProgram = glCreateProgram();
+  glAttachShader(shaderProgram, vertexShader);
+  glAttachShader(shaderProgram, fragmentShader);
+  glLinkProgram(shaderProgram);
+
+  // error handling
+  int success;
+  char infoLog[512];
+  glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+  if (!success) {
+    std::cout << stderr << "Failed to link shader program" << std::endl;
+    glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+    std::cout << stderr << infoLog << std::endl;
+  }
+
+//  glDeleteShader(vertexShader);
+//  glDeleteShader(fragmentShader);
+
+  return shaderProgram;
+}
 
 /*===============================================================*/
-/* -------------------VAO, VBO---------------------*/
-const char *vertexShaderSource =
-    "#version 410\n"
-    "in vec3 vp;\n"
-    "void main()\n"
-    "{"
-    "    gl_Position = vec4(vp, 1.0);"
-    "}";
-
-const char *fragmentShaderSource =
-    "#version 410\n"
-    "//in vec3 vp;\n"
-    "out vec4 frag_colour;\n"
-    "void main()\n"
-    "{"
-    "frag_colour = vec4(1, 1, 1, 1);"
-    "}";
-
-// working on this
-int make_vao(int verts)
+/*  ----------------main loop---------------- */
+void draw(GLFWwindow *window, unsigned int shaderProgram, unsigned int VAO)
 {
-    
+  glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glUseProgram(shaderProgram);
+  glBindVertexArray(VAO);
+  std::cout << VAO << std::endl;
+
+  glDrawArrays(GL_TRIANGLES, 0, 3);
+  std::cout << "Here4" << std::endl;
+  glfwPollEvents();
+  glfwSwapBuffers(window);
 }
 
 
-unsigned int compile_shader()
+/* program entry */
+int main()
 {
-    
+  GLFWwindow* window = init_glfw();
+  init_glad();
+
+  unsigned int vertexShader, fragmentShader, shaderProgram;
+  vertexShader = compile_shader(vertexShaderSource, GL_VERTEX_SHADER);
+  fragmentShader = compile_shader(fragmentShaderSource, GL_FRAGMENT_SHADER);
+  shaderProgram = create_program(vertexShader, fragmentShader);
+
+  glfwMakeContextCurrent(window);
+  glfwSwapInterval(1);
+
+  glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+
+  glOrtho(0.0, 1.0, 0.0, 1.0, 0.0, 1.0); // this creates a canvas you can do 2D drawing on
+
+
+
+  unsigned int VAO = make_vao(vertices);
+
+  int i = 0;
+  // render loop
+  while (!glfwWindowShouldClose(window)) {
+//    process_input(::window);
+    std::cout << ++i << std::endl;
+
+    draw(window, shaderProgram, VAO);
+
+//    glClearColor(1.f, 1.f, 1.f, 1.0f);
+//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//
+//    // Use the shader program and bind the VAO
+//    glUseProgram(shaderProgram);
+//    VAO = make_vao(vertices);
+//    glBindVertexArray(VAO);
+//
+//    // Draw the triangle
+//    glDrawArrays(GL_TRIANGLES, 0, 3);
+
+    // Swap buffers and poll for events
+    glfwSwapBuffers(window);
+    glfwPollEvents();
+  }
+
+  glfwTerminate();
+  exit(EXIT_SUCCESS);
 }
