@@ -12,7 +12,7 @@
 namespace wvxy {
 
 GlUtils::GlUtils(const std::string name, int screen_width, int screen_height)
-    : SCR_WIDTH(screen_width), SCR_HEIGHT(screen_height), windowName{name}{
+    : SCR_WIDTH{screen_width}, SCR_HEIGHT{screen_height}, windowName{name}{
         Init();
 }
 
