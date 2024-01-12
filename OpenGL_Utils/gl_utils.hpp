@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 namespace wvxy {
 
@@ -17,8 +18,7 @@ class GlUtils {
 
     GLFWwindow* window;
 
-    void Draw(float* vertices, unsigned int* indices, size_t size_verts,
-              size_t size_indices);
+    void Draw(std::vector<float>& vertices, std::vector<uint16_t>& indices);
 
     void Run();
 
@@ -42,8 +42,7 @@ class GlUtils {
     unsigned int CreateProgram(unsigned int vertexShader,
                                unsigned int fragmentShader);
 
-    void CreateBuffer(float& verts, unsigned int& indices, size_t size_verts,
-                      size_t size_indices);
+    void CreateBuffer(std::vector<float>& vertices, std::vector<uint16_t>& indices);
     void BindBuffer();
 
 

@@ -137,21 +137,21 @@ unsigned int GlUtils::CreateProgram(unsigned int vertexShader,
     return program;
 }
 
-void GlUtils::CreateBuffer(float& verts, unsigned int& indices,
-                           size_t size_verts, size_t size_indices) {
+void GlUtils::CreateBuffer(std::vector<float>& vertices, std::vector<uint16_t>& indices) {
+    auto sizeVertices = static_cast<GLsizeiptr>(vertices.size() * sizeof(vertices[0]));
+    auto sizeIndices = static_cast<GLsizeiptr>(indices.size() * sizeof(vertices[0]));
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
 
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, size_verts, &verts, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeVertices, &vertices, GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, size_indices, &indices,
-                 GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeIndices, &indices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(indices[0]), nullptr);
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -162,11 +162,11 @@ void GlUtils::BindBuffer() {
     glBindVertexArray(VAO);
 }
 
-void GlUtils::Draw(float* vertices, unsigned int* indices, size_t size_verts,
-                   size_t size_indices) {
-    CreateBuffer(*vertices, *indices, size_verts, size_indices);
+void GlUtils::Draw(std::vector<float>& vertices, std::vector<uint16_t>& indices) {
+    CreateBuffer(vertices, indices);
+    std::cout << indices.size() << std::endl;
     BindBuffer();
-    glDrawElements(GL_TRIANGLES, size_indices / 4, GL_UNSIGNED_INT, nullptr);
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 }
 
 void GlUtils::Run() {
