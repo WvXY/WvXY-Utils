@@ -11,8 +11,8 @@
 
 namespace wvxy {
 
-GlUtils::GlUtils(int screen_width, int screen_height)
-    : SCR_WIDTH(screen_width), SCR_HEIGHT(screen_width) {
+GlUtils::GlUtils(const std::string name, int screen_width, int screen_height)
+    : SCR_WIDTH(screen_width), SCR_HEIGHT(screen_height), windowName{name}{
         Init();
 }
 
@@ -54,7 +54,10 @@ GLFWwindow* GlUtils::InitGLFW() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6); // opengl x.3
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", nullptr,
+    window = glfwCreateWindow(SCR_WIDTH,
+                              SCR_HEIGHT,
+                              windowName.c_str(),
+                              nullptr,
                               nullptr);
     if (window == nullptr) {
         std::cout << stderr << "Failed to create GLFW window" << std::endl;

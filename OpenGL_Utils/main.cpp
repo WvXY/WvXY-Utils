@@ -7,23 +7,24 @@ int main() {
         -0.5f, -0.5f, 0.0f, // bottom left
         -0.5f, 0.5f,  0.0f, // top left
         -0.3f, 0.7f,  0.0f  // top left
-
     };
     unsigned int indices[] = {
         0, 1, 3, // first Triangle
         1, 2, 3, // second Triangle
-        1, 3, 4, 0, 1, 4,
+        1, 3, 4, // random
+        0, 1, 4
     };
 
-    wvxy::GlUtils gl_utils{600, 800};
+    wvxy::GlUtils glUtils{"Hello GL", 800, 600};
+    GLFWwindow* window = glUtils.window;
 
-    while (!glfwWindowShouldClose(gl_utils.window)) {
+    while (!glfwWindowShouldClose(window)) {
         glClearColor(0.2f, 0.3f, 0.3f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        gl_utils.Draw(vertices, indices, sizeof(vertices), sizeof(indices));
+        glUtils.Draw(vertices, indices, sizeof(vertices), sizeof(indices));
 
-        glfwSwapBuffers(gl_utils.window);
+        glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
