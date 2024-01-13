@@ -2,6 +2,7 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <GLM/glm.hpp>
 
 #include <iostream>
 #include <string>
@@ -9,17 +10,22 @@
 
 namespace wvxy {
 
+struct Vertex {
+        glm::vec3 position;
+        glm::vec3 color;
+//        glm::vec2 texCoord;
+};
+
 class GlUtils {
   public:
-    GlUtils(const std::string name, int screen_width, int screen_height);
+    GlUtils(std::string window_name, int screen_width, int screen_height);
     ~GlUtils();
     GlUtils(const GlUtils&) = delete;
     GlUtils& operator=(const GlUtils&) = delete;
 
-    GLFWwindow* window;
+    GLFWwindow* window{};
 
-    void Draw(std::vector<float>& vertices, std::vector<uint16_t>& indices);
-
+    void Draw(std::vector<Vertex>& vertices, std::vector<uint16_t>& indices);
     void Run();
 
   private:
@@ -27,24 +33,25 @@ class GlUtils {
     int SCR_HEIGHT{600};
     const std::string windowName;
 
-    unsigned int VBO, VAO, EBO;
+    unsigned int VBO{}, VAO{}, EBO{};
     std::string vertexShaderSource;
     std::string fragmentShaderSource;
-    unsigned int shaderProgram;
+    unsigned int shaderProgram{};
 
     void Init();
     GLFWwindow* InitGLFW();
     void InitGLAD();
     void InitViewport();
 
-    std::string ReadShaderSource(const std::string path);
+    std::string ReadShaderSource(const std::string& path);
     unsigned int CompileShader(std::string& source, int type);
     unsigned int CreateProgram(unsigned int vertexShader,
                                unsigned int fragmentShader);
 
-    void CreateBuffer(std::vector<float>& vertices, std::vector<uint16_t>& indices);
+    bool hasTexture{false};
+    bool hasIndices{false};
+    void CreateBuffer(std::vector<Vertex>& vertices, std::vector<uint16_t>& indices);
     void BindBuffer();
-
 
 };
 } // namespace wvxy

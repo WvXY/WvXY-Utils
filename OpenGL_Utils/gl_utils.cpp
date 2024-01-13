@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <utility>
 #include <vector>
 #include <filesystem>
 
@@ -11,8 +12,8 @@
 
 namespace wvxy {
 
-GlUtils::GlUtils(const std::string name, int screen_width, int screen_height)
-    : SCR_WIDTH{screen_width}, SCR_HEIGHT{screen_height}, windowName{name}{
+GlUtils::GlUtils(std::string  window_name, int screen_width, int screen_height)
+    : SCR_WIDTH{screen_width}, SCR_HEIGHT{screen_height}, windowName{std::move(window_name)}{
         Init();
 }
 
@@ -80,7 +81,7 @@ void GlUtils::InitGLAD() {
 
 void GlUtils::InitViewport() { glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT); }
 
-std::string GlUtils::ReadShaderSource(const std::string path) {
+std::string GlUtils::ReadShaderSource(const std::string& path) {
     std::ifstream file{path, std::ios::ate | std::ios::binary};
 
     if (!file.is_open()) {
@@ -137,16 +138,21 @@ unsigned int GlUtils::CreateProgram(unsigned int vertexShader,
     return program;
 }
 
-void GlUtils::CreateBuffer(std::vector<float>& vertices, std::vector<uint16_t>& indices) {
-    auto sizeVertices = static_cast<GLsizeiptr>(vertices.size() * sizeof(vertices[0]));
-    auto sizeIndices = static_cast<GLsizeiptr>(indices.size() * sizeof(vertices[0]));
+void GlUtils::CreateBuffer(std::vector<Vertex>& vertices, std::vector<uint16_t>& indices) {
+
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
 
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeVertices, &vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 10, &vertices, GL_STATIC_DRAW);
+
+//    // https://learnopengl.com/Getting-started/Shaders fix this later
+//    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
+//    glEnableVertexAttribArray(0);
+//    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3* sizeof(float)));
+//    glEnableVertexAttribArray(1);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeIndices, &indices, GL_STATIC_DRAW);
@@ -158,15 +164,23 @@ void GlUtils::CreateBuffer(std::vector<float>& vertices, std::vector<uint16_t>& 
 }
 
 void GlUtils::BindBuffer() {
+//    glBindAttribLocation(shaderProgram, 0, "vPos");
+//    glBindAttribLocation(shaderProgram, 1, "vColor");
+
+//    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
+//    glEnableVertexAttribArray(0);
+//
+//    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3* sizeof(float)));
+//    glEnableVertexAttribArray(1);
+
     glUseProgram(shaderProgram);
     glBindVertexArray(VAO);
 }
 
-void GlUtils::Draw(std::vector<float>& vertices, std::vector<uint16_t>& indices) {
+void GlUtils::Draw(std::vector<Vertex>& vertices, std::vector<uint16_t>& indices) {
     CreateBuffer(vertices, indices);
-    std::cout << indices.size() << std::endl;
     BindBuffer();
-    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
+    glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, nullptr);
 }
 
 void GlUtils::Run() {
