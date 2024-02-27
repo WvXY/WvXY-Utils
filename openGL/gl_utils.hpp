@@ -3,7 +3,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <iostream>
 #include <string>
 
 namespace wvxy {
@@ -45,7 +44,5 @@ class GlUtils {
     void CreateBuffer(float& verts, unsigned int& indices, size_t size_verts,
                       size_t size_indices);
     void BindBuffer();
-
-
 };
 } // namespace wvxy

@@ -9,12 +9,6 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/glad)
 find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
 
-#find_package(CGAL REQUIRED)
-#find_package(Boost REQUIRED)
-#find_package(GMP REQUIRED)
-#find_package(PkgConfig REQUIRED)
-#pkg_check_modules(gmp REQUIRED IMPORTED_TARGET gmp)
-
 add_executable(${PROJECT_NAME}
 #        demo_legacy.cpp
 #        demo_modern.cpp
@@ -24,10 +18,9 @@ add_executable(${PROJECT_NAME}
         )
 
 target_link_libraries(${PROJECT_NAME}
-#        PkgConfig::gmp
-#        Eigen3::Eigen
         OpenGL::GL
         glfw
         glad
-#        CGAL
         )
+
+file(COPY shaders DESTINATION .)

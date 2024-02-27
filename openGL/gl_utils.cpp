@@ -1,19 +1,17 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include "gl_utils.hpp"
 
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
-#include <filesystem>
 
-#include "gl_utils.hpp"
 
 namespace wvxy {
 
 GlUtils::GlUtils(const std::string name, int screen_width, int screen_height)
-    : SCR_WIDTH{screen_width}, SCR_HEIGHT{screen_height}, windowName{name}{
-        Init();
+    : SCR_WIDTH{screen_width}, SCR_HEIGHT{screen_height}, windowName{name} {
+    Init();
 }
 
 GlUtils::~GlUtils() {
@@ -24,19 +22,19 @@ GlUtils::~GlUtils() {
     glfwTerminate();
 }
 
-void GlUtils::Init(){
+void GlUtils::Init() {
     InitGLFW();
     InitGLAD();
     InitViewport();
-    std::filesystem::path p = std::filesystem::current_path().parent_path();
-    fragmentShaderSource =
-        ReadShaderSource(p.string() + "/shaders/simple_shader.frag");
-    vertexShaderSource =
-        ReadShaderSource(p.string() + "/shaders/simple_shader.vert");
+    //    std::filesystem::path p =
+    //    std::filesystem::current_path().parent_path();
+
+    fragmentShaderSource = ReadShaderSource("shaders/simple_shader.frag");
+    vertexShaderSource = ReadShaderSource("shaders/simple_shader.vert");
     auto vertexShader = CompileShader(vertexShaderSource, GL_VERTEX_SHADER);
     auto fragmentShader =
         CompileShader(fragmentShaderSource, GL_FRAGMENT_SHADER);
-    auto shaderProgram = CreateProgram(vertexShader, fragmentShader);
+    CreateProgram(vertexShader, fragmentShader);
 }
 
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height) {
@@ -54,11 +52,8 @@ GLFWwindow* GlUtils::InitGLFW() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6); // opengl x.3
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window = glfwCreateWindow(SCR_WIDTH,
-                              SCR_HEIGHT,
-                              windowName.c_str(),
-                              nullptr,
-                              nullptr);
+    window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, windowName.c_str(),
+                              nullptr, nullptr);
     if (window == nullptr) {
         std::cout << stderr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -177,7 +172,7 @@ void GlUtils::Run() {
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-    
+
     glfwTerminate();
     exit(EXIT_SUCCESS);
 }
