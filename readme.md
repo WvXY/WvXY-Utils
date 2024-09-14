@@ -1,4 +1,5 @@
-# WvXY's Utility Library
+# WvXY's Tiny Projects For Fun
 
-My private utility library using c++, python and so on for archive and future use.
+Just some simple things as a beginner, nothing too fancy.
 
+Not worthing looking at, really.
